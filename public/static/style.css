@@ -15,7 +15,11 @@
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{
+  scroll-behavior:smooth;
+  /* header fixed ~69px — tanpa ini judul section ketutup saat klik nav */
+  scroll-padding-top:96px;
+}
 body{
   background:var(--ink);
   color:var(--text);
@@ -34,6 +38,23 @@ a:focus-visible,button:focus-visible{
   outline-offset:3px;
   border-radius:6px;
 }
+
+/* screen-reader only — konteks tambahan tanpa mengubah tampilan */
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;
+}
+
+/* skip link — muncul hanya saat difokus keyboard */
+.skip-link{
+  position:absolute;left:16px;top:-100px;z-index:100;
+  background:var(--gold);color:#231A0E;
+  font-weight:700;font-size:.92rem;
+  padding:12px 20px;border-radius:0 0 12px 12px;
+  text-decoration:none;
+  transition:top .2s ease;
+}
+.skip-link:focus{top:0}
 
 /* ============ ambient fabric ribbon ============ */
 #ambient-ribbon{
@@ -103,12 +124,17 @@ a:focus-visible,button:focus-visible{
   background-position:90% 0;
   box-shadow:0 10px 34px rgba(201,161,90,.42);
 }
+.btn-gold:active{
+  transform:translateY(0);
+  box-shadow:0 3px 14px rgba(201,161,90,.34);
+}
 .btn-ghost{
   color:var(--text);
   border:1px solid rgba(242,236,226,.22);
   background:rgba(242,236,226,.04);
 }
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold-soft);transform:translateY(-2px)}
+.btn-ghost:active{transform:translateY(0);background:rgba(242,236,226,.09)}
 .btn-outline{
   color:var(--gold-soft);
   border:1px solid rgba(201,161,90,.45);
@@ -116,6 +142,8 @@ a:focus-visible,button:focus-visible{
   padding:10px 20px;min-height:44px;font-size:.9rem;
 }
 .btn-outline:hover{background:rgba(201,161,90,.12)}
+.btn-outline:active{background:rgba(201,161,90,.2)}
+.nav-pill:active{background:rgba(242,236,226,.12)}
 
 /* ============ typography helpers ============ */
 .eyebrow{
@@ -169,7 +197,9 @@ section{max-width:1180px;margin:0 auto;padding:110px 24px;position:relative}
   border:1px solid rgba(242,236,226,.14);
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   box-shadow:0 24px 60px rgba(0,0,0,.45);
-  transition:transform .18s ease-out;
+  /* Tanpa transition di transform: tilt sudah di-lerp per-frame di app.js.
+     Dua lapis damping bikin gerakannya terasa lag/mushy. */
+  transition:box-shadow .3s ease,border-color .3s ease;
   will-change:transform;overflow:hidden;
 }
 .panel-back{
@@ -287,6 +317,11 @@ section{max-width:1180px;margin:0 auto;padding:110px 24px;position:relative}
 .contact-panel h2{font-size:clamp(2rem,4.4vw,3rem);max-width:640px;margin:0 auto 14px}
 .contact-panel .section-sub{margin:0 auto 36px}
 .contact-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.contact-handle{
+  font-family:var(--font-mono);font-size:.8rem;letter-spacing:.06em;
+  color:var(--text-mute);margin-top:26px;
+}
+.contact-handle strong{color:var(--gold-soft);font-weight:500}
 .contact-sheen{
   position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(105deg,transparent 35%,rgba(231,200,136,.07) 48%,rgba(143,224,201,.05) 55%,transparent 70%);
@@ -303,10 +338,12 @@ section{max-width:1180px;margin:0 auto;padding:110px 24px;position:relative}
   font-family:var(--font-mono);font-size:.72rem;letter-spacing:.2em;
   text-transform:uppercase;color:var(--gold);margin-top:16px;
 }
-.footer-copy{color:var(--text-mute);font-size:.8rem;margin-top:8px;opacity:.7}
+/* opacity .7 sebelumnya bikin warna efektif #7D766D = 4.29:1 (di bawah AA).
+   Sekarang pakai warna solid — 7.64:1, lolos AA. */
+.footer-copy{color:var(--text-mute);font-size:.8rem;margin-top:8px}
 
 /* ============ reveal animation ============ */
-.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.7,.3,1),transform .8s cubic-bezier(.2,.7,.3,1)}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.22,.68,.24,1),transform .7s cubic-bezier(.22,.68,.24,1)}
 .reveal.is-visible{opacity:1;transform:none}
 .reveal[data-stagger="2"]{transition-delay:.1s}
 .reveal[data-stagger="3"]{transition-delay:.2s}
@@ -328,6 +365,15 @@ section{max-width:1180px;margin:0 auto;padding:110px 24px;position:relative}
   .nav-ig{margin-left:auto}
   #hero-section{padding-top:120px}
   .hero-cta .btn{width:100%;justify-content:center}
+  .contact-cta .btn{width:100%;justify-content:center}
+  html{scroll-padding-top:84px}
+}
+
+/* pointer kasar (touch): hover state nggak relevan & bisa "nyangkut" */
+@media (hover:none){
+  .glass-card:hover{transform:none;box-shadow:none;border-color:rgba(242,236,226,.09)}
+  .glass-card:hover::before{opacity:0}
+  .btn-gold:hover,.btn-ghost:hover{transform:none}
 }
 
 /* ============ reduced motion ============ */
@@ -335,7 +381,11 @@ section{max-width:1180px;margin:0 auto;padding:110px 24px;position:relative}
   html{scroll-behavior:auto}
   #ambient-ribbon::before,.gp-sheen,.contact-sheen,.badge-live .dot{animation:none}
   .reveal{opacity:1;transform:none;transition:none}
-  .glass-panel{transition:none}
+  .glass-panel{transition:none;transform:none !important}
   .glass-card,.btn{transition-property:border-color,background,color}
+  .glass-card:hover,.btn-gold:hover,.btn-ghost:hover,.btn-gold:active,.btn-ghost:active{transform:none}
+  .case-link{transition:color .2s}
+  .case-link:hover{gap:8px}
+  .skip-link{transition:none}
   .parallax-orb{display:none}
 }
