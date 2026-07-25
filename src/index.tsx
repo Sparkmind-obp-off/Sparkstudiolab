@@ -3,6 +3,37 @@ import { serveStatic } from 'hono/cloudflare-workers'
 
 const app = new Hono()
 
+/* ══════════════════════════════════════════════════════════════════════
+ * ⚠️  KONTAK — PERLU DIISI MANUAL
+ * ══════════════════════════════════════════════════════════════════════
+ * Nomor WhatsApp SparkStudioLab BELUM tersedia dari owner.
+ * Selama nilainya masih string kosong, tombol "Chat WhatsApp" TIDAK
+ * dirender sama sekali (biar nggak ada tombol mati di production).
+ * Begitu diisi, tombolnya muncul otomatis — nggak perlu ubah apa-apa lagi.
+ *
+ * Format: kode negara tanpa "+", tanpa spasi/strip. Contoh: '6281234567890'
+ */
+const WA_NUMBER = '' // ← ganti nomor WA asli di sini
+
+/* Instagram: handle di bawah SUDAH TERKONFIRMASI akun asli & aktif.
+ * BUKAN placeholder — jangan diubah. */
+const IG_HANDLE = 'sparkstudiolab'
+
+const IG_URL = `https://instagram.com/${IG_HANDLE}`
+const WA_URL = WA_NUMBER
+  ? `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent('Halo SparkStudioLab, saya mau tanya soal demo landing page untuk usaha saya.')}`
+  : ''
+
+const SITE_URL = 'https://sparkstudiolab.pages.dev'
+const SITE_TITLE = 'SparkStudioLab — Studio Desain Web Purwokerto'
+const SITE_DESC = 'SparkStudioLab bikinin demo landing page gratis buat UMKM dan komunitas di Purwokerto. Lihat dulu hasil jadinya — baru mikir mau lanjut atau nggak.'
+
+/* Favicon inline (data-URI) — nol request tambahan, sekaligus mematikan
+ * 404 /favicon.ico yang muncul sebagai console error. */
+const FAVICON = `data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#110E0C"/><text x="32" y="45" font-family="Georgia,serif" font-style="italic" font-weight="700" font-size="40" fill="#C9A15A" text-anchor="middle">S</text></svg>`
+)}`
+
 app.use('/static/*', serveStatic({ root: './public' }))
 
 app.get('/', (c) => {
@@ -11,14 +42,38 @@ app.get('/', (c) => {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkStudioLab — Studio Desain Web Purwokerto</title>
-<meta name="description" content="SparkStudioLab bikinin demo landing page gratis buat UMKM dan komunitas di Purwokerto. Lihat dulu hasil jadinya — baru mikir mau lanjut atau nggak.">
+<title>${SITE_TITLE}</title>
+<meta name="description" content="${SITE_DESC}">
+<meta name="theme-color" content="#110E0C">
+<link rel="canonical" href="${SITE_URL}/">
+<link rel="icon" href="${FAVICON}">
+<link rel="apple-touch-icon" href="/static/og.png">
+
+<!-- Open Graph / Twitter — penting: jalur utama kontak lewat DM Instagram,
+     jadi link ini sering dibagikan di chat & sosial. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SparkStudioLab">
+<meta property="og:locale" content="id_ID">
+<meta property="og:url" content="${SITE_URL}/">
+<meta property="og:title" content="${SITE_TITLE}">
+<meta property="og:description" content="${SITE_DESC}">
+<meta property="og:image" content="${SITE_URL}/static/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="SparkStudioLab — website yang bikin usaha lokal kelihatan sudah lama besar.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${SITE_TITLE}">
+<meta name="twitter:description" content="${SITE_DESC}">
+<meta name="twitter:image" content="${SITE_URL}/static/og.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="/static/style.css" rel="stylesheet">
 </head>
 <body>
+
+<a href="#main-content" class="skip-link">Lompat ke konten utama</a>
 
 <div id="ambient-ribbon" aria-hidden="true"></div>
 
@@ -30,14 +85,15 @@ app.get('/', (c) => {
       <a href="#proses" class="nav-pill">Proses</a>
       <a href="#kontak" class="nav-pill">Kontak</a>
     </div>
-    <a href="https://instagram.com/sparkstudiolab" target="_blank" rel="noopener" class="btn btn-outline nav-ig">
+    <a href="${IG_URL}" target="_blank" rel="noopener" class="btn btn-outline nav-ig">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
       Instagram
+      <span class="sr-only">(buka di tab baru)</span>
     </a>
   </nav>
 </header>
 
-<main>
+<main id="main-content">
   <!-- ============ HERO ============ -->
   <section id="hero-section">
     <div class="hero-inner">
@@ -47,13 +103,13 @@ app.get('/', (c) => {
         <p class="hero-sub reveal" data-stagger="3">SparkStudioLab bikinin demo landing page gratis buat UMKM dan komunitas di Purwokerto. Kamu lihat dulu hasil jadinya — baru mikir mau lanjut atau nggak.</p>
         <div class="hero-cta reveal" data-stagger="4">
           <a href="#portofolio" class="btn btn-gold">Lihat portofolio</a>
-          <a href="https://instagram.com/sparkstudiolab" target="_blank" rel="noopener" class="btn btn-ghost">DM kami di Instagram</a>
+          <a href="${IG_URL}" target="_blank" rel="noopener" class="btn btn-ghost">DM kami di Instagram<span class="sr-only"> (buka di tab baru)</span></a>
         </div>
         <p class="trust-line reveal" data-stagger="5">Berbasis di Purwokerto&ensp;·&ensp;Proses lewat demo langsung, bukan proposal PDF</p>
       </div>
 
       <!-- Signature: floating glass panels, 3D tilt -->
-      <div class="hero-visual reveal" data-stagger="3" aria-hidden="true">
+      <div class="hero-visual reveal" data-stagger="3" aria-hidden="true" role="presentation">
         <div id="glass-stage">
           <div class="glass-panel panel-back" data-depth="0.4">
             <div class="gp-bar"><i></i><i></i><i></i></div>
@@ -93,6 +149,7 @@ app.get('/', (c) => {
         <p class="case-tag">Kedai kopi lokal</p>
         <p class="case-desc">Demo landing page buat kedai kopi di Kalibener — fokus ke suasana yang hangat dan info yang gampang dicari: menu, jam buka, lokasi.</p>
         <a href="https://kedai-sedulur-demo.pages.dev" target="_blank" rel="noopener" class="case-link">Buka demo live
+          <span class="sr-only">— Kedai Sedulur Kalibener (buka di tab baru)</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>
         </a>
       </article>
@@ -141,15 +198,18 @@ app.get('/', (c) => {
       <h2>Mau usahamu jadi <em>studi kasus berikutnya?</em></h2>
       <p class="section-sub">Nggak ada paket harga baku — tiap project kita mulai dari ngobrol dan lihat kebutuhan kamu dulu.</p>
       <div class="contact-cta">
-        <a href="https://instagram.com/sparkstudiolab" target="_blank" rel="noopener" class="btn btn-gold">
+        <a href="${IG_URL}" target="_blank" rel="noopener" class="btn btn-gold">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           DM lewat Instagram
+          <span class="sr-only">(buka di tab baru)</span>
         </a>
-        <a href="https://wa.me/" target="_blank" rel="noopener" class="btn btn-ghost">
+        ${WA_URL ? `<a href="${WA_URL}" target="_blank" rel="noopener" class="btn btn-ghost">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.4 14.1c-.2.7-1.3 1.3-1.8 1.3-.5.1-1 .2-3.4-.7-2.9-1.2-4.7-4.1-4.9-4.3-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5-.3.6-.7.9-.5 1.2.7 1.2 1.6 2 2.8 2.6.3.2.5.1.7-.1l.9-1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.6.3 0 .1 0 .8-.2 1.3Z"/></svg>
           Chat WhatsApp
-        </a>
+          <span class="sr-only">(buka di tab baru)</span>
+        </a>` : ''}
       </div>
+      <p class="contact-handle">Instagram: <strong>@${IG_HANDLE}</strong></p>
     </div>
   </section>
 </main>
@@ -162,6 +222,22 @@ app.get('/', (c) => {
     <p class="footer-copy">© 2026 SparkStudioLab</p>
   </div>
 </footer>
+
+<script type="application/ld+json">${JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  name: 'SparkStudioLab',
+  description: SITE_DESC,
+  url: SITE_URL,
+  areaServed: { '@type': 'City', name: 'Purwokerto' },
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Purwokerto',
+    addressRegion: 'Jawa Tengah',
+    addressCountry: 'ID'
+  },
+  sameAs: [IG_URL]
+})}</script>
 
 <script src="/static/app.js" defer></script>
 </body>
